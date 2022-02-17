@@ -1,4 +1,5 @@
 import pygame
+import random
 pygame.init()  
 pygame.display.set_caption("easy platformer")  # sets the window title
 screen = pygame.display.set_mode((800, 800))  # creates game screen
@@ -13,16 +14,34 @@ UP = 2
 DOWN = 3
 
 
+#DO be platform :)
+class platform:
+    def __init__(self, xpos, ypos ):
+        self.xpos = xpos
+        self.ypos = ypos
+        
+    def draw(self):
+        pygame.draw.rect(screen, (255, 0, 255), (self.xpos, self.ypos, 50, 20))
+      
+        
+    def collide(self, xpos, ypos):
+        if xpos+20>self.xpos and xpos<self.xpos+50 and ypos+40>self.ypos and ypos+40<self.ypos+20:
+            return self.ypos
+        else:
+            return False
+       
+      
+platbag = list()
+for i in range(10):
+    platbag.append(platform(random.randrange(100,700),random.randrange(100,700)))
 
-#player variables
-xpos = 500 #xpos of player
-ypos = 200 #ypos of player
-vx = 0 #x velocity of player
-vy = 0 #y velocity of player
+xpos = 300
+ypos =300
+vx = 0
+vy =0
+isOnGround = False
+
 keys = [False, False, False, False] #this list holds whether each key has been pressed
-isOnGround = False #this variable stops gravity from pulling you down more when on a platform
-
-
 
 while not gameover: #GAME LOOP############################################################
     clock.tick(60) #FPS
@@ -32,7 +51,7 @@ while not gameover: #GAME LOOP##################################################
         if event.type == pygame.QUIT:
             gameover = True
       
-        if event.type == pygame.KEYDOWN: #keyboard input
+        if event.type == pygame.KEYDOWN: #keyboard input p1
             if event.key == pygame.K_LEFT:
                 keys[LEFT]=True
                 
@@ -44,7 +63,7 @@ while not gameover: #GAME LOOP##################################################
                 
                 
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
+            if event.key ==  pygame.K_LEFT:
                 keys[LEFT]=False
 
             elif event.key == pygame.K_UP:
@@ -52,17 +71,17 @@ while not gameover: #GAME LOOP##################################################
                 
             if event.key == pygame.K_RIGHT:
                 keys[RIGHT]=False
-          
+                
     #physics section--------------------------------------------------------------------
     #RIGHT MOVEMENT
     if keys[RIGHT]==True:
-        vx=3
-        direction = RIGHT            
+        vx = 3
+                   
                 
     #LEFT MOVEMENT
     elif keys[LEFT]==True:
-        vx=-3
-        direction = LEFT
+        vx = -3
+        
 
     #turn off velocity
     else:
@@ -75,31 +94,14 @@ while not gameover: #GAME LOOP##################################################
     
     
 
+    #collision
+    isOnGround = False
+    for platform in platbag:
+        if platform.collide(xpos, ypos) != False:
+            isOnGround = True
+            vy =0
+            ypos = platform.collide(xpos, ypos)-40
     
-    #COLLISION
-    if xpos+20>100 and xpos<200 and ypos+40 >750 and ypos+40 <770:
-        ypos = 750-40
-        isOnGround = True
-        vy = 0
-    elif xpos+20>200 and xpos<300 and ypos+40 >650 and ypos+40 <670:
-        ypos = 650-40
-        isOnGround = True
-        vy = 0
-    elif xpos+20>300 and xpos<400 and ypos+40 >550 and ypos+40 <570:
-        ypos = 550-40
-        isOnGround = True
-        vy = 0
-    elif xpos+20>400 and xpos<500 and ypos+40 >450 and ypos+40 <470:
-        ypos = 450-40
-        isOnGround = True
-        vy = 0
-    elif xpos+20>500 and xpos<600 and ypos+40 >350 and ypos+40 <370:
-        ypos = 350-40
-        isOnGround = True
-        vy = 0
-    else:
-        isOnGround = False
-
 
     
     #stop falling if on bottom of game screen
@@ -110,35 +112,22 @@ while not gameover: #GAME LOOP##################################################
     
     #gravity
     if isOnGround == False:
-        vy+=.25 #notice this grows over time, aka ACCELERATION
+        vy += .25 #notice this grows over time, aka ACCELERATION
     
 
     #update player position
-    xpos+=vx 
-    ypos+=vy
+    xpos += vx 
+    ypos += vy
     
   
     # RENDER Section--------------------------------------------------------------------------------
             
     screen.fill((0,0,0)) #wipe screen so it doesn't smear
-  
-    pygame.draw.rect(screen, (100, 200, 100), (xpos, ypos, 20, 40))
+      
+    pygame.draw.rect(screen, (250, 250, 0), (xpos, ypos, 20, 40))
     
-    #first platform
-    pygame.draw.rect(screen, (255, 117, 117), (100, 750, 100, 20))
-    
-    #second platform
-    pygame.draw.rect(screen, (255, 158, 117), (200, 650, 100, 20))
-    
-    #Third platform
-    pygame.draw.rect(screen, (194, 255, 140), (300, 550, 100, 20))
-    
-    #Fourth platform
-    pygame.draw.rect(screen, (117, 255, 181), (400, 450, 100, 20))
-    
-    #Fifth platform
-    pygame.draw.rect(screen, (117, 241, 255), (500, 350, 100, 20))
-    
+    for platform in platbag:
+        platform.draw()
     pygame.display.flip()#this actually puts the pixel on the screen
     
 #end game loop------------------------------------------------------------------------------
